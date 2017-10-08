@@ -1,0 +1,13 @@
+{
+  "name": "canvas",
+  "version": "0.0.1",
+  "main": "src/app.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "devDependencies": {
+    "babel-loader": "^7.1.2",
+    "html-webpack-plugin": "^2.30.1",
+    "webpack": "^3.6.0"
+  }
+}

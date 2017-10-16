@@ -1,0 +1,3 @@
+export const PAINTER_STEPS = 'PAINTER_STEPS';
+export const DEFAULT_BORDER_WIDTH = 2;
+export const DEFAULT_BORDER_COLOR = '#333333';

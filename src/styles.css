@@ -59,6 +59,9 @@ canvas {
     text-transform: uppercase;
     cursor: pointer;
 }
+input[type='file'] {
+    display: none;
+}
 .right {
     margin-left: auto;
 }

@@ -1,5 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
@@ -13,7 +13,7 @@ module.exports = {
         rules: [
             {
                 test: /\.js$/,
-                exclude: path.resolve(__dirname, "node_modules"),
+                exclude: path.resolve(__dirname, 'node_modules'),
                 loader: 'babel-loader',
                 query: {
                     presets: ['env', 'stage-3']
@@ -22,9 +22,16 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
-                    use: "css-loader"
+                    fallback: 'style-loader',
+                    use: 'css-loader'
                 })
+            },
+            {
+                test: /\.jpg$/,
+                loader: 'file-loader',
+                options: {
+                    name: '[name].[ext]'
+                }
             }
         ]
     },

@@ -1,8 +1,9 @@
 import Shape from './Shape';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, DEFAULT_BORDER_WIDTH, DEFAULT_BORDER_COLOR } from "../constants/index";
 
 class Rectangle extends Shape {
-    constructor (context, x = 170, y = 140, width = 80, height = 60) {
-        super(context, 'Rectangle', x, y, width, height);
+    constructor (context, x = CANVAS_WIDTH / 2, y = CANVAS_HEIGHT / 2, width = 80, height = 60, borderWidth = DEFAULT_BORDER_WIDTH, borderColor = DEFAULT_BORDER_COLOR) {
+        super(context, 'Rectangle', x - width / 2, y - height / 2, width, height, borderWidth, borderColor);
     }
 
     draw () {

@@ -1,4 +1,7 @@
+import ImageElement from "./components/ImageElement";
+
 require('./styles.css');
+require('./img.jpg');
 
 import DataBase from './db/DataBase';
 
@@ -20,6 +23,7 @@ import * as actions from './actions/';
         shapes: null,
         activeShapeIndex: null,
         draggableElementIndex: -1,
+        resizingElementIndex: -1,
         activeElementDefaultValue: 'Nothing Selected',
         elementsListDefaultOption: '<option selected>Empty List</option>',
         defaultBorderColor: '#333333',
@@ -42,15 +46,20 @@ import * as actions from './actions/';
                     if (v.type === 'Rectangle') {
                         shape = new Rectangle(_self.canvasContext);
                         shape.updateData(v);
+                        shape.draw();
                     } else if (v.type === 'Circle') {
                         shape = new Circle(_self.canvasContext);
-                        shape.update(v);
+                        shape.updateData(v);
+                        shape.draw();
                     } else if (v.type === 'Line') {
                         shape = new Line(_self.canvasContext);
                         shape.updateData(v);
+                        shape.draw();
+                    } else if (v.type === 'Image') {
+                        shape = new ImageElement(v.src, _self.canvasContext);
+                        shape.update(v);
                     }
                     _self.shapes.push(shape);
-                    shape.draw();
                 });
                 _self.updateShapesList();
                 _self.setActiveElement();

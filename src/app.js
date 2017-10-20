@@ -1,21 +1,25 @@
-import ImageElement from "./components/ImageElement";
-
 require('./styles.css');
-require('./img.jpg');
 
 import DataBase from './db/DataBase';
-
+import ImageElement from "./components/ImageElement";
 import Line from './components/Line';
 import Rectangle from './components/Rectangle';
 import Circle from './components/Circle';
+import Filters from './actions/Filters';
 
 import * as actions from './actions/';
+
+import { CANVAS_WIDTH, CANVAS_HEIGHT } from "./constants/index";
 
 (function () {
     const main = {
         slider: null,
-        colorPicker: null,
+        colorPickers: null,
         selector: null,
+        filterList: null,
+        filterValue: null,
+        filters: null,
+        activeFilter: 'grayscale',
         canvas: null,
         canvasContext: null,
         dataBase: null,
@@ -29,18 +33,19 @@ import * as actions from './actions/';
         defaultBorderColor: '#333333',
         defaultBorderWidth: 2,
         redrawShapes: function () {
-            this.canvasContext.clearRect(0, 0, 470, 370);
+            this.canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             this.shapes.forEach(shape => {
                 if (shape.show) {
                     shape.draw();
                 }
             });
+            this.filters.applyFilters();
         },
         loadSaved: function () {
             if (this.dataBase.history.length) {
                 const _self = this;
-                const { shapes, activeShapeIndex } = this.dataBase.getLastHistory();
-                this.activeShapeIndex = activeShapeIndex;
+                const { shapes, activeShapeIndex, filters, activeFilter } = this.dataBase.getLastHistory();
+                _self.activeShapeIndex = activeShapeIndex;
                 (shapes || []).forEach(v => {
                     let shape = null;
                     if (v.type === 'Rectangle') {
@@ -62,7 +67,13 @@ import * as actions from './actions/';
                     _self.shapes.push(shape);
                 });
                 _self.updateShapesList();
-                _self.setActiveElement();
+
+                if (!!filters && !!activeFilter) {
+                    _self.activeFilter = activeFilter;
+                    _self.filters = new Filters(_self.canvasContext);
+                    _self.filters.updateData(filters);
+                    _self.updateFiltersList();
+                }
             }
         },
         init () {
@@ -71,10 +82,13 @@ import * as actions from './actions/';
             this.shapes = [];
 
             this.dataBase = new DataBase();
+            this.filters = new Filters(this.canvasContext);
 
             this.slider = this.initSlider();
-            this.colorPicker = this.initColorPicker();
+            this.colorPickers = this.initColorPicker();
             this.selector = this.initShapesSelector();
+            this.filterList = this.initFilters();
+            this.filterValue = this.initFilterRangeSlider();
 
             this.initButtons();
             this.initDragAndDrop();

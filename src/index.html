@@ -12,12 +12,8 @@
             <div class="button right" id="clear">clear</div>
         </div>
         <div class="row">
-            <div class="canvas"><canvas id="painter" width="470" height="370" /></div>
+            <div class="canvas"><canvas id="painter" width="470" height="420" /></div>
             <div class="menu">
-                <div class="container">
-                    <label for="active-element">Active Element:</label>
-                    <input class="active-element" id="active-element" type="text" placeholder="Nothing Selected" disabled>
-                </div>
                 <div class="container">
                     <label for="elements">Elements:</label>
                     <select id="elements">
@@ -27,11 +23,26 @@
                 <div class="container">
                     <label for="width-range">Border Width:</label>
                     <input type="range" min="1" max="20" value="2" class="slider" id="width-range">
-                    <div class="width-range-value">width: <span id="width-range-value">2</span>px</div>
+                    <div class="slider-text-value width-range-value">width: <span id="width-range-value">2</span>px</div>
+                </div>
+                <div class="container flex-columns">
+                    <div class="col">
+                        <label for="borderColorPicker">Border Color:</label>
+                        <input type="color" class="color-picker" id="borderColorPicker">
+                    </div>
+                    <div class="col">
+                        <label for="fillColorPicker">Fill Color:</label>
+                        <input type="color" class="color-picker" id="fillColorPicker">
+                    </div>
                 </div>
                 <div class="container">
-                    <label for="color-picker">Color:</label>
-                    <input type="color" id="color-picker">
+                    <label for="filters">Filters:</label>
+                    <select id="filters"></select>
+                </div>
+                <div class="container">
+                    <label for="filterValue">Filter Value:</label>
+                    <input type="range" min="-1" max="100" value="-1" class="slider" id="filterValue">
+                    <div class="slider-text-value" id="filterValueText"></div>
                 </div>
             </div>
         </div>
@@ -39,7 +50,10 @@
             <div class="button" id="line">Line</div>
             <div class="button" id="rect">Rectangle</div>
             <div class="button" id="circle">Circle</div>
-            <div class="button" id="image">Add Image</div>
+            <div class="textField">
+                <input type="text" class="input" id="imagePath" placeholder="" required>
+                <label for="imagePath" class="placeholder">Put IMAGE URL here</label>
+            </div>
         </div>
     </div>
 </body>

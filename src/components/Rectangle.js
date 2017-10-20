@@ -7,7 +7,7 @@ class Rectangle extends Shape {
     }
 
     draw () {
-        this.drawShape(() => this.context.strokeRect(this.x, this.y, this.width, this.height));
+        this.drawShape(() => this.context.rect(this.x, this.y, this.width, this.height));
     }
 }
 

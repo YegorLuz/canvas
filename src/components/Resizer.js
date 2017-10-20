@@ -41,8 +41,10 @@ class Resizer {
 
         this.context.beginPath();
         this.context.strokeStyle = this.borderColor;
-        this.context.strokeWidth = this.borderWidth;
-        this.context.strokeRect(this.x, this.y, this.width, this.height);
+        this.context.fillStyle = 'transparent';
+        this.context.lineWidth = this.borderWidth;
+        this.context.rect(this.x, this.y, this.width, this.height);
+        this.context.stroke();
         this.context.closePath();
 
         this.drawPointer(this.x, this.y);

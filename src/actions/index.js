@@ -3,8 +3,7 @@ import Line from '../components/Line';
 import Circle from '../components/Circle';
 import ImageElement from '../components/ImageElement';
 
-import { DEFAULT_BORDER_COLOR, DEFAULT_BORDER_WIDTH } from '../constants/';
-import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../constants/index";
+import { DEFAULT_BORDER_COLOR, DEFAULT_BORDER_WIDTH, BORDER_COLOR_PICKER, FILL_COLOR_PICKER, CANVAS_HEIGHT, CANVAS_WIDTH, DEFAULT_FILL_COLOR } from '../constants/';
 
 export function initSlider () {
     const _self = this;
@@ -20,10 +19,7 @@ export function initSlider () {
     };
 
     slider.onmouseup = function () {
-        _self.dataBase.add({
-            shapes: [..._self.shapes],
-            activeShapeIndex: _self.activeShapeIndex,
-        });
+        _self.saveData();
     };
 
     return slider;
@@ -31,20 +27,28 @@ export function initSlider () {
 
 export function initColorPicker () {
     const _self = this;
-    const colorPicker = document.getElementById('color-picker');
+    const colorPickerElements = document.getElementsByClassName('color-picker');
+    const colorPickers = {};
 
-    colorPicker.oninput = function () {
-        const activeShape = _self.shapes[_self.activeShapeIndex];
-        activeShape.setBorderColor(this.value);
-        _self.redrawShapes();
+    for (let i = 0; i < colorPickerElements.length; ++i) {
+        const colorPicker = colorPickerElements[i];
+        colorPicker.oninput = function () {
+            const activeShape = _self.shapes[_self.activeShapeIndex];
 
-        _self.dataBase.add({
-            shapes: [..._self.shapes],
-            activeShapeIndex: _self.activeShapeIndex,
-        });
-    };
+            if (this.id === BORDER_COLOR_PICKER) {
+                activeShape.setBorderColor(this.value);
+            } else if (this.id === FILL_COLOR_PICKER) {
+                activeShape.setFillColor(this.value);
+            }
 
-    return colorPicker;
+            _self.redrawShapes();
+
+            _self.saveData();
+        };
+        colorPickers[colorPicker.id] = colorPicker;
+    }
+
+    return colorPickers;
 }
 
 export function setResizer () {
@@ -63,7 +67,24 @@ export function initButtons () {
     const rectButton = document.getElementById('rect');
     const circleButton = document.getElementById('circle');
     const clearButton = document.getElementById('clear');
-    const imageButton = document.getElementById('image');
+    const imagePath = document.getElementById('imagePath');
+
+    imagePath.onchange = function () {
+        if (!!this.value) {
+            const img = new Image();
+            img.onload = function () {
+                const image = new ImageElement(this.src, _self.canvasContext);
+                _self.activeShapeIndex = _self.shapes.length;
+                _self.shapes.push(image);
+                _self.updateShapesList();
+
+                _self.saveData();
+
+                _self.setResizer();
+            };
+            img.src = this.value;
+        }
+    };
 
     const undoButton = document.getElementById('undo');
     const redoButton = document.getElementById('redo');
@@ -75,10 +96,7 @@ export function initButtons () {
         line.draw();
         _self.updateShapesList();
 
-        _self.dataBase.add({
-            shapes: [..._self.shapes],
-            activeShapeIndex: _self.activeShapeIndex,
-        });
+        _self.saveData();
 
         _self.setResizer();
     };
@@ -90,10 +108,7 @@ export function initButtons () {
         rect.draw();
         _self.updateShapesList();
 
-        _self.dataBase.add({
-            shapes: [..._self.shapes],
-            activeShapeIndex: _self.activeShapeIndex,
-        });
+        _self.saveData();
 
         _self.setResizer();
     };
@@ -105,32 +120,16 @@ export function initButtons () {
         circle.draw();
         _self.updateShapesList();
 
-        _self.dataBase.add({
-            shapes: [..._self.shapes],
-            activeShapeIndex: _self.activeShapeIndex
-        });
+        _self.saveData();
 
         _self.setResizer();
     };
 
     clearButton.onclick = function () {
         _self.setDefaultData();
+        imagePath.value = '';
 
         _self.dataBase.clear();
-    };
-
-    imageButton.onclick = function () {
-        const image = new ImageElement('img.jpg', _self.canvasContext);
-        _self.activeShapeIndex = _self.shapes.length;
-        _self.shapes.push(image);
-        _self.updateShapesList();
-
-        _self.dataBase.add({
-            shapes: [..._self.shapes],
-            activeShapeIndex: _self.activeShapeIndex
-        });
-
-        _self.setResizer();
     };
 
     undoButton.onclick = function () {
@@ -143,7 +142,8 @@ export function initButtons () {
                 } else {
                     _self.shapes[key].updateData(shape);
                     _self.updateSlider(shape.borderWidth);
-                    _self.updateColorPicker(shape.borderColor);
+                    _self.updateColorPicker(BORDER_COLOR_PICKER, shape.borderColor);
+                    _self.updateColorPicker(FILL_COLOR_PICKER, shape.fillColor);
                 }
             });
             _self.activeShapeIndex = activeShapeIndex;
@@ -160,7 +160,8 @@ export function initButtons () {
             _self.shapes.forEach((shape, key) => {
                 if (!!shapes[key]) {
                     shape.updateData(shapes[key]);
-                    _self.updateColorPicker(shapes[key].borderColor);
+                    _self.updateColorPicker(BORDER_COLOR_PICKER, shapes[key].borderColor);
+                    _self.updateColorPicker(FILL_COLOR_PICKER, shapes[key].fillColor);
                     _self.updateSlider(shapes[key].borderWidth);
                 } else {
                     _self.shapes[key].show = false;
@@ -180,9 +181,19 @@ export function updateSlider (value) {
     document.getElementById('width-range-value').innerHTML = value || DEFAULT_BORDER_WIDTH;
 }
 
-export function updateColorPicker (value) {
+export function updateColorPicker (type = null, value = null) {
     const _self = this;
-    _self.colorPicker.value = value || DEFAULT_BORDER_COLOR;
+    if (type) {
+        if (value) {
+            _self.colorPickers[type].value = value;
+        } else {
+            _self.colorPickers[type].value = type === BORDER_COLOR_PICKER ? DEFAULT_BORDER_COLOR: DEFAULT_FILL_COLOR;
+        }
+    } else {
+        for (let i in _self.colorPickers) {
+            if (_self.colorPickers.hasOwnProperty(i)) _self.colorPickers[i].value = i === BORDER_COLOR_PICKER ? DEFAULT_BORDER_COLOR: DEFAULT_FILL_COLOR;
+        }
+    }
 }
 
 export function setDefaultData () {
@@ -191,10 +202,9 @@ export function setDefaultData () {
     _self.shapes = [];
     _self.activeShapeIndex = null;
     _self.canvasContext.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    _self.setActiveElement(_self.activeElementDefaultValue);
     _self.updateShapesList();
     _self.updateSlider(DEFAULT_BORDER_WIDTH);
-    _self.updateColorPicker(DEFAULT_BORDER_COLOR);
+    _self.updateColorPicker();
 }
 
 export function initShapesSelector () {
@@ -204,28 +214,16 @@ export function initShapesSelector () {
     list.oninput = function () {
         const parts = this.value.match(/(\w+)\s\((\d*)\)/i);
         _self.activeShapeIndex = parseInt(parts[2]);
-        _self.setActiveElement();
 
         const activeShape = _self.shapes[_self.activeShapeIndex];
-        _self.updateColorPicker(activeShape.getBorderColor());
+        _self.updateColorPicker(BORDER_COLOR_PICKER, activeShape.getBorderColor());
+        _self.updateColorPicker(FILL_COLOR_PICKER, activeShape.getFillColor());
         _self.updateSlider(activeShape.getBorderWidth());
 
         _self.setResizer();
     };
 
     return list;
-}
-
-export function setActiveElement (value = null) {
-    const _self = this;
-    const activeElement = document.getElementById('active-element');
-    if (!value) {
-        const index = _self.activeShapeIndex;
-        const type = _self.shapes[_self.activeShapeIndex].type;
-        activeElement.value = `${type} (${index})`;
-    } else {{
-        activeElement.value = value;
-    }}
 }
 
 export function updateShapesList () {
@@ -237,9 +235,9 @@ export function updateShapesList () {
         html += `<option${selected}>${shape.type} (${key})</option>`;
 
         if (key === _self.activeShapeIndex) {
-            _self.updateColorPicker(shape.getBorderColor());
+            _self.updateColorPicker(BORDER_COLOR_PICKER, shape.getBorderColor());
+            _self.updateColorPicker(FILL_COLOR_PICKER, shape.getFillColor());
             _self.updateSlider(shape.getBorderWidth());
-            _self.setActiveElement();
         }
     });
 
@@ -261,7 +259,8 @@ export function initDragAndDrop () {
                 _self.draggableElementIndex = key;
                 _self.activeShapeIndex = key;
                 _self.updateSlider(shape.getBorderWidth());
-                _self.updateColorPicker(shape.getBorderColor());
+                _self.updateColorPicker(BORDER_COLOR_PICKER, shape.getBorderColor());
+                _self.updateColorPicker(FILL_COLOR_PICKER, shape.getFillColor());
                 _self.updateShapesList();
                 _self.setResizer();
                 return false;
@@ -285,10 +284,7 @@ export function initDragAndDrop () {
     };
     _self.canvas.onmouseup = function () {
         if (_self.draggableElementIndex !== -1 || _self.resizingElementIndex !== -1) {
-            _self.dataBase.add({
-                shapes: [..._self.shapes],
-                activeShapeIndex: _self.activeShapeIndex,
-            });
+            _self.saveData();
         }
         _self.draggableElementIndex = -1;
         _self.resizingElementIndex = -1;
@@ -340,4 +336,83 @@ export function initDragAndDrop () {
             _self.redrawShapes();
         }
     };
+}
+
+export function initFilters () {
+    const _self = this;
+    const filtersElement = document.getElementById('filters');
+    const filterValueText = document.getElementById('filterValueText');
+
+    const filters = _self.filters.filters;
+    filterValueText.innerText = filters[_self.activeFilter].value === _self.filters.NONE_VALUE ? 'none' : `${filters[_self.activeFilter].unitText}: ${filters[_self.activeFilter].value}${filters[_self.activeFilter].unit}`;
+
+    filtersElement.innerHTML = _self.buildFilterOptions(filters);
+
+    filtersElement.onchange = function () {
+        _self.activeFilter = this.options[this.selectedIndex].id;
+        const activeFilter = _self.filters.filters[_self.activeFilter];
+        const unit = activeFilter.unit;
+        const unitText = activeFilter.unitText;
+        const value = activeFilter.value;
+        _self.filterValue.value = value;
+        filterValueText.innerText = value === _self.filters.NONE_VALUE ? 'none' : `${unitText}: ${value}${unit}`;
+    };
+
+    return filtersElement;
+}
+
+export function buildFilterOptions (filters) {
+    let options = '';
+    for (let i in filters) {
+        if (filters.hasOwnProperty(i)) {
+            options += `<option id="${i}" ${i === this.activeFilter ? 'selected' : ''}>${i.replace('_', ' ')}</option>`;
+        }
+    }
+    return options;
+}
+
+export function initFilterRangeSlider () {
+    const _self = this;
+    const filterValueElement = document.getElementById('filterValue');
+    const filterValueText = document.getElementById('filterValueText');
+
+    const activeFilter = _self.filters.filters[_self.activeFilter];
+    const unit = activeFilter.unit;
+    const unitText = activeFilter.unitText;
+    filterValueText.innerHTML = parseInt(filterValueElement.value) === _self.filters.NONE_VALUE ? 'none' : `${unitText}: ${filterValueElement.value}${unit}`;
+
+    filterValueElement.oninput = function () {
+        const value = parseInt(this.value);
+        activeFilter.value = value;
+        filterValueText.innerHTML = value === _self.filters.NONE_VALUE ? 'none' : `${unitText}: ${value}${unit}`;
+        _self.filters[_self.activeFilter](value);
+    };
+
+    filterValueElement.onmouseup = function () {
+        _self.saveData();
+        _self.redrawShapes();
+    };
+
+    return filterValueElement;
+}
+
+export function updateFiltersList () {
+    const _self = this;
+    const activeFilter = _self.filters.filters[_self.activeFilter];
+    const value = activeFilter.value;
+    const unit = activeFilter.unit;
+    const unitText = activeFilter.unitText;
+    _self.filterList.innerHTML = _self.buildFilterOptions(_self.filters.filters);
+    document.getElementById('filterValueText').innerHTML = value === _self.filters.NONE_VALUE ? 'none' : `${unitText}: ${value}${unit}`;
+    _self.filterValue.value = value;
+}
+
+export function saveData () {
+    const _self = this;
+    _self.dataBase.add({
+        shapes: [..._self.shapes],
+        filters: {..._self.filters.filters},
+        activeShapeIndex: _self.activeShapeIndex,
+        activeFilter: _self.activeFilter
+    });
 }

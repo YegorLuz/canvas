@@ -3,6 +3,9 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 const path = require('path');
 
+const DEVELOPMENT = 'development';
+const NODE_ENV = process.env.NODE_ENV || DEVELOPMENT;
+
 module.exports = {
     entry: './src/app.js',
     output: {
@@ -35,8 +38,24 @@ module.exports = {
             }
         ]
     },
-    plugins: [
-        new webpack.optimize.UglifyJsPlugin(),
+    plugins: NODE_ENV === DEVELOPMENT ? [
+        new HtmlWebpackPlugin({template: './src/index.html'}),
+        new ExtractTextPlugin('styles.css'),
+    ] : [
+        new webpack.optimize.UglifyJsPlugin({
+            beautify: false,
+            comments: false,
+            compress: {
+                warnings: false,
+                drop_console: true
+            },
+            mangle: {
+                except: ['$'],
+                screw_ie8 : true,
+                keep_fnames: true
+            },
+            sourceMap: false
+        }),
         new HtmlWebpackPlugin({template: './src/index.html'}),
         new ExtractTextPlugin('styles.css'),
     ]

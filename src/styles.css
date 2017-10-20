@@ -6,6 +6,10 @@ body {
     background: #ccc;
     line-height: 0;
 }
+.container {
+    padding: 10px 0;
+    border-bottom: 1px solid #d3d3d3;
+}
 .row {
     background: #eee;
 }
@@ -24,7 +28,7 @@ body {
 }
 .canvas {
     width: 500px;
-    height: 400px;
+    height: 450px;
     border-right: 1px solid #ccc;
     padding: 15px;
 }
@@ -37,8 +41,22 @@ canvas {
     flex-direction: column;
     justify-content: space-between;
     width: 300px;
-    height: 400px;
+    height: 450px;
     padding: 10px 15px;
+}
+.flex-columns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 45%;
+}
+.col input {
+    width: 50%;
 }
 .active-element {
     width: 100%;
@@ -59,9 +77,56 @@ canvas {
     text-transform: uppercase;
     cursor: pointer;
 }
-input[type='file'] {
-    display: none;
+
+.textField {
+    margin: 8px;
+    background: #fff;
+    position: relative;
+    width: 300px;
 }
+.input {
+    position: absolute;
+    border: 1px solid #ccc;
+    background: transparent;
+    top: 0;
+    left: 0;
+    width: 100%;
+    font-size: 14px;
+    color: #000;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 10px;
+    z-index: 2;
+    -webkit-transition: all 200ms ease;
+    transition: all 200ms ease;
+}
+.placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    font-size: 14px;
+    color: #ccc;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 10px;
+    z-index: 1;
+    -webkit-transition: all 200ms ease;
+    transition: all 200ms ease;
+}
+.input:focus,
+.input:valid {
+    padding-top: 14px;
+    line-height: 26px;
+}
+.input:focus + .placeholder,
+.input:valid + .placeholder {
+    line-height: 12px;
+    height: 12px;
+    font-size: 10px;
+    padding-top: 2px;
+}
+
 .right {
     margin-left: auto;
 }
@@ -71,8 +136,12 @@ label {
     font-weight: 600;
 }
 
-#elements {
+select {
     width: 100%;
+    text-transform: capitalize;
+}
+option {
+    text-transform: capitalize;
 }
 
 .slider {
@@ -105,7 +174,7 @@ label {
     cursor: pointer;
 }
 
-.width-range-value {
+.slider-text-value {
     float: right;
     line-height: 25px;
 }
